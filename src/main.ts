@@ -32,23 +32,26 @@ const jsonProducts = [
     {"category":"Coffee Machine","price":1300,"manufacturer":"Delonghi","createdAt":"2019-05-28T02:55:29.946Z"}
 ];
 
+let filtredProducts: [] = [];
+
 class Store {
     constructor(){
         let isProgramWork = true;
 
         while(isProgramWork){
-            const chosenPoint = prompt('Welcome to our store!\nChoose pls what ar u want to do:\na) Whatch list of products;\nb) Filters;\nc) Sort products;\nq) Quit;');
+            const chosenPoint = prompt('Welcome to our store!\nChoose pls what ar u want to do:\na) Whatch list of products;\nb) Filters;\nq) Quit;');
         
             switch (chosenPoint) {
                 case 'a':
-                    this.showAllProducts(jsonProducts);
+                    if(filtredProducts.length === 0){
+                        this.showAllProducts(jsonProducts);
+                    } else {                    
+                        this.showAllProducts(filtredProducts);
+                    }
                     break;
             
                 case 'b':
-                    this.filterProducts();
-                    break;
-            
-                case 'c':
+                    this.filterProducts(filtredProducts);
                     break;
             
                 case 'q':
@@ -68,32 +71,53 @@ class Store {
 
     // --filters
 
-    filterProducts(){
+    filterProducts(filtredProducts: []){
         const filterBy = prompt('How u will filter by?\na) Category;\nb) Price;\nc) Manufactorer\nd) Data;\ne) Clear all filters;');
-
-        let filtredProducts: object[] = [];
 
         switch (filterBy) {
             case 'a':
-                this.filterByCategory(jsonProducts, filtredProducts);
-                console.log(filtredProducts);
+                if(filtredProducts.length === 0){
+                    filtredProducts = this.filterByCategoryOrManufactorer(jsonProducts, filtredProducts);
+                    console.log(filtredProducts);
+                } else {                    
+                    filtredProducts = this.filterByCategoryOrManufactorer(filtredProducts);
+                    console.log(filtredProducts);
+                }
                 
                 break;
 
             case 'b':
-                
+                if(filtredProducts.length === 0){
+                    filtredProducts = this.filterByPrice(jsonProducts, filtredProducts);
+                    console.log(filtredProducts);
+                } else {                    
+                    filtredProducts = this.filterByPrice(filtredProducts);
+                    console.log(filtredProducts);
+                }
                 break;
 
             case 'c':
-                
+                if(filtredProducts.length === 0){
+                    filtredProducts = this.filterByCategoryOrManufactorer(jsonProducts, filtredProducts);
+                    console.log(filtredProducts);
+                } else {                    
+                    filtredProducts = this.filterByCategoryOrManufactorer(filtredProducts);
+                    console.log(filtredProducts);
+                }
                 break;
 
             case 'd':
-                
+                if(filtredProducts.length === 0){
+                    filtredProducts = this.filterByDate(jsonProducts, filtredProducts);
+                    console.log(filtredProducts);
+                } else {                    
+                    filtredProducts = this.filterByDate(filtredProducts);
+                    console.log(filtredProducts);
+                }
                 break;
 
             case 'e':
-                
+                filtredProducts.length = 0;
                 break;
         
             default:
@@ -101,7 +125,7 @@ class Store {
         }
     }
 
-    filterByCategory(productsArr: object[], filtredProducts: object[]){        
+    filterByCategoryOrManufactorer(productsArr: object[], filtredProducts?: object[]){        
         let choseCategory: string = prompt('Choose some filters(Example: 123 or 5');
 
         let categoriesNeedsToShow: [] = []
@@ -110,18 +134,96 @@ class Store {
             categoriesNeedsToShow.push(+choseCategory[i]);
         }
 
-        productsArr.filter((product)=>{
-            for(let i = 0; i < categoriesNeedsToShow.length; i++){
-                const categoryNum = categoriesNeedsToShow[i] - 1;
-                
-                if(productsArr.indexOf(product) === categoryNum){                    
-                    return filtredProducts.push(product)
+        if(filtredProducts){
+            return productsArr.filter((product)=>{
+                for(let i = 0; i < categoriesNeedsToShow.length; i++){
+                    const categoryNum = categoriesNeedsToShow[i] - 1;
+                    
+                    if(productsArr.indexOf(product) === categoryNum){                    
+                        return filtredProducts.push(product)
+                    }
                 }
-            }
-        })
+            })
+        } else {
+            return productsArr.filter((product)=>{                
+                for(let i = 0; i < categoriesNeedsToShow.length; i++){
+                    const categoryNum = categoriesNeedsToShow[i] - 1;
+                    
+                    if(productsArr.indexOf(product) === categoryNum){                    
+                        return true;
+                    }
+                }
+            })
+        }
     }
 
-    filterByPrice(productsArr: object[], filtredProducts: object[]){}
+    filterByPrice(productsArr: object[], filtredProducts?: []){
+        const minPrice = prompt('Enter min price: ');
+        const maxPrice = prompt('Enter max price: ');
+
+        if(filtredProducts){
+            return productsArr.filter((product)=>{
+                const productPrice = +product.price;
+                
+                if(productPrice > +minPrice && productPrice < +maxPrice){
+                    return filtredProducts.push(product);                    
+                }
+            })
+        } else {
+            return productsArr.filter((product)=>{                
+                const productPrice = +product.price;
+                
+                if(productPrice > +minPrice && productPrice < +maxPrice){
+                    return true;                    
+                }
+            })
+        }
+    }
+
+    filterByDate(productsArr: object[], filtredProducts?: []){
+        const minDate = prompt('Enter min year: (example: 2015-03)');
+        const maxDate = prompt('Enter max year: (example: 2015-03)');
+
+        const minDateYear = +minDate?.slice(0, 4);
+        const minDateMonth = +minDate?.slice(5, 7);
+        
+        const maxDateYear = +maxDate?.slice(0, 4);
+        const maxDateMonth = +maxDate?.slice(5, 7);
+
+        if(filtredProducts){
+            return productsArr.filter((product)=>{
+                const productYear = +product.createdAt.slice(0, 4);
+                const productMonth = +product.createdAt.slice(5, 7);                
+
+                
+                if(productYear > minDateYear && productYear < maxDateYear){
+                    return filtredProducts.push(product);                    
+                } else if(productYear === minDateYear || productYear === maxDateYear){
+                    
+                    if(productMonth > minDateMonth && productMonth < maxDateMonth){
+                        return filtredProducts.push(product);
+                    }
+                }
+            })
+        } else {
+            return productsArr.filter((product)=>{                
+                const productYear = +product.createdAt.slice(0, 4);
+                const productMonth = +product.createdAt.slice(5, 7);                
+
+                
+                if(productYear > minDateYear && productYear < maxDateYear){
+                    return true;                    
+                } else if(productYear === minDateYear || productYear === maxDateYear){
+                    
+                    if(productMonth > minDateMonth && productMonth < maxDateMonth){
+                        return true;
+                    }
+                }
+            })
+        }
+    }
+
+
 }
 
 
